@@ -1,0 +1,131 @@
+import pygame
+import sys
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Constants
+WIDTH, HEIGHT = 600, 600
+LINE_COLOR = (0, 0, 0)
+BOARD_COLOR = (255, 255, 255)
+X_COLOR = (255, 0, 0)
+O_COLOR = (0, 0, 255)
+LINE_WIDTH = 15
+GRID_SIZE = 3
+CELL_SIZE = WIDTH // GRID_SIZE
+
+# Set up the display
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Tic Tac Toe")
+screen.fill(BOARD_COLOR)
+
+# Initialize the board
+board = [[" " for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+
+# Function to draw the grid
+def draw_grid():
+    for i in range(1, GRID_SIZE):
+        pygame.draw.line(screen, LINE_COLOR, (i * CELL_SIZE, 0), (i * CELL_SIZE, HEIGHT), LINE_WIDTH)
+        pygame.draw.line(screen, LINE_COLOR, (0, i * CELL_SIZE), (WIDTH, i * CELL_SIZE), LINE_WIDTH)
+
+# Function to draw X
+def draw_x(row, col):
+    x_pos = col * CELL_SIZE + CELL_SIZE // 2
+    y_pos = row * CELL_SIZE + CELL_SIZE // 2
+    pygame.draw.line(screen, X_COLOR, (x_pos - CELL_SIZE // 3, y_pos - CELL_SIZE // 3),
+                     (x_pos + CELL_SIZE // 3, y_pos + CELL_SIZE // 3), LINE_WIDTH)
+    pygame.draw.line(screen, X_COLOR, (x_pos + CELL_SIZE // 3, y_pos - CELL_SIZE // 3),
+                     (x_pos - CELL_SIZE // 3, y_pos + CELL_SIZE // 3), LINE_WIDTH)
+
+# Function to draw O
+def draw_o(row, col):
+    x_pos = col * CELL_SIZE + CELL_SIZE // 2
+    y_pos = row * CELL_SIZE + CELL_SIZE // 2
+    pygame.draw.circle(screen, O_COLOR, (x_pos, y_pos), CELL_SIZE // 3, LINE_WIDTH)
+
+# Function to check for a winner
+def check_winner(player):
+    # Check rows and columns
+    for i in range(GRID_SIZE):
+        if all(board[i][j] == player for j in range(GRID_SIZE)) or \
+           all(board[j][i] == player for j in range(GRID_SIZE)):
+            return True
+    # Check diagonals
+    if all(board[i][i] == player for i in range(GRID_SIZE)) or \
+       all(board[i][GRID_SIZE - 1 - i] == player for i in range(GRID_SIZE)):
+        return True
+    return False
+
+# Function to check if the board is full
+def is_board_full():
+    return all(board[i][j] != " " for i in range(GRID_SIZE) for j in range(GRID_SIZE))
+
+# Function to get the player's move
+def get_player_move():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                col = event.pos[0] // CELL_SIZE
+                row = event.pos[1] // CELL_SIZE
+                if 0 <= row < GRID_SIZE and 0 <= col < GRID_SIZE and board[row][col] == " ":
+                    return row, col
+
+# Function to get the computer's move
+def get_computer_move():
+    empty_cells = [(i, j) for i in range(GRID_SIZE) for j in range(GRID_SIZE) if board[i][j] == " "]
+    return random.choice(empty_cells)
+
+# Main game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    draw_grid()
+
+    # Player's move
+    player_row, player_col = get_player_move()
+    draw_x(player_row, player_col)
+    board[player_row][player_col] = "X"
+
+    # Check for a winner or a tie
+    if check_winner("X"):
+        print("Player wins!")
+        pygame.display.flip()
+        pygame.time.wait(2000)
+        pygame.quit()
+        sys.exit()
+    elif is_board_full():
+        print("It's a tie!")
+        pygame.display.flip()
+        pygame.time.wait(2000)
+        pygame.quit()
+        sys.exit()
+
+    pygame.display.flip()
+
+    # Computer's move
+    computer_row, computer_col = get_computer_move()
+    draw_o(computer_row, computer_col)
+    board[computer_row][computer_col] = "O"
+
+    # Check for a winner or a tie
+    if check_winner("O"):
+        print("Computer wins!")
+        pygame.display.flip()
+        pygame.time.wait(2000)
+        pygame.quit()
+        sys.exit()
+    elif is_board_full():
+        print("It's a tie!")
+        pygame.display.flip()
+        pygame.time.wait(2000)
+        pygame.quit()
+        sys.exit()
+
+    pygame.display.flip()
